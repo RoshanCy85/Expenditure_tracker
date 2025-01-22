@@ -31,14 +31,20 @@ app.get('/submit',(req,res)=>{
     res.sendFile(path.join(__dirname,'public','login.html'));
 });
 app.post('/submit', async(req,res)=>{
-    const { email,username,password } = req.body;
+    const { email,username,password,phonenumber } = req.body;
     try{
-        await db.query("INSERT INTO users(username,email,password)  VALUES($1,$2,$3)",[username,email,password]);
-         res.sendFile(path.join(__dirname,'public','login.html'));
-         
-         console.log('Email:', email);
-         console.log('Username:', username);
-         console.log('Password:', password);
+        const phonenumber_search=await db.query("SELECT phone_number FROM users WHERE phone_number LIKE $1",[`%${phonenumber}%`]);
+        const username_search=await db.query("SELECT username FROM users WHERE username LIKE $1",[`%${username}%`]);
+        const email_search=await db.query("SELECT email FROM users WHERE email LIKE $1",[`%${email}%`])
+        if(username_search.rows.length==0 && email_search.rows.length==0 && phonenumber_search.rows.length==0){
+            await db.query("INSERT INTO users(username,email,password)  VALUES($1,$2,$3)",[username,email,password]);
+            res.sendFile(path.join(__dirname,'public','login.html'));
+            
+        }
+        else if(username_search.rows.length!=0 || email_search.rows.length!=0 || phonenumber_search.rows.length!=0){
+            res.status(404).json({ message : `username or email or phonenumber already taken`});
+        }
+        
     } catch(err) {
         console.log(err);
     }
@@ -47,8 +53,7 @@ app.post('/login',async(req,res)=>{
     const { login_username , login_password } = req.body;
     try{
         const username_search=await db.query("SELECT username FROM users WHERE username LIKE $1",[`%${login_username}%`]);
-        const username_result = username_search.rows[0].username;
-        console.log(username_result);  // 'leo'
+         // 'leo'
 
         if(username_search.rows.length==0){
             res.status(404).json({ message : `username not found`});
@@ -57,7 +62,9 @@ app.post('/login',async(req,res)=>{
             // console.log(login_username);
             // console.log(login_password);
             // console.log(username_search);
-
+            const username_result = username_search.rows[0].username;
+            console.log(username_result); 
+            
             const password_search=await db.query("SELECT password FROM users WHERE username LIKE $1",[username_result]);
             const password_result = password_search.rows[0].password;
 
@@ -68,6 +75,8 @@ app.post('/login',async(req,res)=>{
                 res.sendFile(path.join(__dirname,'public','index.html'));
             }
             else{
+                console.log('login unsuccessful');
+                
                 res.status(404).json({ message : `password incorrect`});
 
             }
