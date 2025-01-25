@@ -1,2 +1,2 @@
 This is an expenditure tracker website.
-user authentication with email
+user authentication with email. update soon
