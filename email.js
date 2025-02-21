@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/
 // import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyC5vZ3n4d9jbRm6L32ulznJ2aJ3MDnJiIU",
+    apiKey: "process.env.API_KEY",
     authDomain: "email-verify-b8039.firebaseapp.com",
     projectId: "email-verify-b8039",
     storageBucket: "email-verify-b8039.firebasestorage.app",
