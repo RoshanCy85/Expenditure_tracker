@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Buddy</title>
+    <link rel="stylesheet" href="css/firstPage.css"> <!-- Link to external CSS -->
+</head>
+<body>
+    <div id="webcrumbs">
+        <div class="w-[1200px] bg-white">
+            <nav class="flex flex-col md:flex-row items-center justify-between p-6 border-b sticky top-0 bg-white z-50">
+                <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 w-full md:w-auto">
+                    <h1 class="text-2xl font-bold">Budget Buddy</h1>
+                    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 w-full md:w-auto">
+                        <details class="relative w-full md:w-auto">
+                            <summary class="hover:underline transform hover:scale-105 transition cursor-pointer">Spending Category</summary>
+                            <div class="absolute top-full left-0 right-0 bg-white shadow-lg rounded-lg p-4 w-full md:w-48 z-50">
+                                <% if (categories.length > 0) { %>
+                                    <% categories.forEach(category => { %>
+                                        <a href="/transactions/<%= category %>" class="block py-2 px-4 hover:bg-neutral-50 rounded-lg"><%= category %></a>
+                                    <% }); %>
+                                <% } else { %>
+                                    <p class="text-gray-500 px-4 py-2">No categories available</p>
+                                <% } %>
+                            </div>
+                        </details>
+                        
+                        <details class="relative w-full md:w-auto">
+                            <summary class="hover:underline transform hover:scale-105 transition cursor-pointer">Profile</summary>
+                            <div class="absolute top-full left-0 right-0 bg-white shadow-lg rounded-lg p-4 w-full md:w-48 z-50">
+                                <a href="#profile" class="block py-2 px-4 hover:bg-neutral-50 rounded-lg">View Profile</a>
+                                <a href="#signout" class="block py-2 px-4 hover:bg-neutral-50 rounded-lg">Sign Out</a>
+                            </div>
+                        </details>
+                        <a href="#about" class="hover:underline transform hover:scale-105 transition">About Us</a>
+                        <a href="#contact" class="hover:underline transform hover:scale-105 transition">Contact</a>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                    <button class="px-6 py-2 border-2 border-amber-600 text-amber-600 rounded-full hover:bg-amber-600 hover:text-white">Sign Out</button>
+                    <button class="px-6 py-2 bg-amber-600 text-white rounded-full hover:bg-amber-700">View Statement</button>
+                </div>
+            </nav>
+
+            <header class="relative h-[500px] bg-gradient-to-r from-amber-800 to-amber-600 flex flex-col justify-center px-4 md:px-20">
+                <h1 class="text-3xl md:text-5xl font-bold text-white mb-6">WELCOME <%= username %>,</h1>
+                <p class="text-lg md:text-xl text-white mb-8 max-w-2xl">“A simple fact that is hard to learn is that the time to save money is when you have some.” – Joe Moore</p>
+                
+                <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                    <!-- Add Expense Button -->
+                    <details class="group w-full md:w-auto relative">
+                        <summary class="w-full md:w-auto px-8 py-3 bg-white text-amber-800 rounded-full hover:bg-amber-100 transform hover:scale-105 transition cursor-pointer">
+                            ADD EXPENSE
+                        </summary>
+                        <div class="absolute mt-4 bg-white rounded-lg shadow-xl p-6 w-[300px] z-50">
+                            <input type="number" id="expenseAmount" placeholder="Enter amount" class="w-full px-4 py-2 mb-4 border rounded-lg focus:ring-2 focus:ring-amber-600"/>
+                    
+                            <!-- Dropdown for category selection -->
+                            <select id="expenseCategory" class="w-full px-4 py-2 mb-4 border rounded-lg focus:ring-2 focus:ring-amber-600">
+                                <option selected disabled>Select Category</option>
+                                <% if (categories.length > 0) { %>
+                                    <% categories.forEach(category => { %>
+                                        <option value="<%= category %>"><%= category %></option>
+                                    <% }); %>
+                                <% } else { %>
+                                    <option disabled>No categories available</option>
+                                <% } %>
+                            </select>
+                    
+                            <button onclick="addExpense()" class="w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">
+                                Add Expense
+                            </button>
+                        </div>
+                    </details>
+                    
+
+                    <!-- Add Section Button -->
+                    <details class="relative">
+                        <summary class="px-8 py-3 border-2 border-white text-white rounded-full hover:bg-white hover:text-amber-800 transform hover:scale-105 transition cursor-pointer">ADD SECTION</summary>
+                        <div class="absolute top-full mt-2 p-6 bg-white rounded-xl shadow-lg z-10">
+                            <h3 class="text-xl font-semibold text-amber-800">Add New Section</h3>
+                            <form action="/add-section" method="POST">
+                            <input type="text" id="section-name" placeholder="Enter section name" class="w-full px-4 py-2 border-2 border-amber-200 rounded-lg focus:border-amber-500"/>
+                            <div class="flex justify-end space-x-3 mt-4">
+                                <button class="px-4 py-2 text-amber-800 bg-amber-100 rounded-lg hover:bg-amber-200">Cancel</button>
+                                <button class="px-4 py-2 text-white bg-amber-800 rounded-lg hover:bg-amber-700" id="add-section-btn">Add Section</button>
+                            </div>
+                            </form>
+                        </div>
+                    </details>
+                </div>
+            </header>
+        </div>
+    </div>
+</body>
+<script>
+    // add expense 
+     async function addExpense() {
+        const amount = document.getElementById("expenseAmount").value;
+        const category = document.getElementById("expenseCategory").value;
+
+        if (!amount || category === "Select Category") {
+            alert("Please enter a valid amount and select a category.");
+            return;
+        }
+
+        const response = await fetch("/add-expense", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ amount, category }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload(); // Reloads the page after successful addition
+        } else {
+            alert("Failed to add expense.");
+        }
+    }
+
+// add section 
+    document.querySelector("#add-section-btn").addEventListener("click", async () => {
+    const sectionName = document.querySelector("#section-name").value.trim();
+    if (!sectionName) {
+        alert("Please enter a section name.");
+        return;
+    }
+
+    const response = await fetch("/add-section", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sectionName }),
+         credentials: "include"
+    });
+
+    if (response.ok) {
+        location.reload();  // Reloads the page
+    } else {
+        alert("Failed to add section.");
+    }
+});
+
+</script>
+</html>
